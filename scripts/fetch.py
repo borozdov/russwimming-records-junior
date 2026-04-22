@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch Russian junior swimming records from russwimming.ru and write a normalized JSON."""
+"""Fetch Russian swimming records from russwimming.ru and write a normalized JSON."""
 from __future__ import annotations
 
 import json
@@ -68,7 +68,9 @@ def date_to_iso(raw: str) -> str | None:
 
 
 def parse_discipline(text: str) -> dict:
+    """Extract stroke / distance / relay info from the discipline cell."""
     t = text.strip()
+    # Relay? e.g. "4 х 100 м вольный стиль" (Cyrillic «х»)
     relay_match = re.match(r"^(\d+)\s*[хx]\s*(\d+)\s*м\s*(.*)$", t, flags=re.IGNORECASE)
     if relay_match:
         count = int(relay_match.group(1))
@@ -108,6 +110,7 @@ def parse_discipline(text: str) -> dict:
 
 
 def parse_athlete(raw: str) -> tuple[str, list[str] | None]:
+    """Split «Сборная России (A, B, C, D)» into team + roster."""
     m = re.match(r"^(.*?)\s*\((.*)\)\s*$", raw.strip())
     if not m:
         return raw.strip(), None
@@ -145,6 +148,7 @@ def parse_records_from_html(html: str) -> list[dict]:
             records.append(rec)
         if not records:
             raise RuntimeError(f"no records parsed for category '{cat['id']}'")
+        # Stable sort: by distance, then relay flag, then stroke, then result
         records.sort(key=lambda r: (
             r["relay"],
             r["total_distance_m"] or 0,
@@ -161,21 +165,17 @@ def main() -> int:
     total = sum(len(c["records"]) for c in categories)
     now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    prior_fetched_at = None
     prior_categories = None
     if OUT.exists():
         try:
             prior = json.loads(OUT.read_text(encoding="utf-8"))
-            prior_fetched_at = prior.get("fetched_at")
             prior_categories = prior.get("categories")
         except (json.JSONDecodeError, OSError):
             pass
 
-    fetched_at = now_iso if prior_categories != categories else (prior_fetched_at or now_iso)
-
     payload = {
         "source_url": SOURCE_URL,
-        "fetched_at": fetched_at,
+        "fetched_at": now_iso,
         "total_records": total,
         "categories": categories,
     }
