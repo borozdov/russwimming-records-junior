@@ -1,6 +1,6 @@
 {
   "source_url": "https://russwimming.ru/records/junior/",
-  "fetched_at": "2026-04-27T08:09:15Z",
+  "fetched_at": "2026-04-28T08:10:50Z",
   "total_records": 91,
   "categories": [
     {
@@ -222,13 +222,13 @@
           "distance_m": 200,
           "stroke_id": "freestyle",
           "is_25m_pool": false,
-          "athlete": "Баклакова Мария",
+          "athlete": "Мишарина Ксения",
           "roster": null,
-          "result": "1:58.21",
-          "result_seconds": 118.21000000000001,
-          "location": "Познань",
-          "date": "2013-07-13",
-          "date_original": "13.07.2013"
+          "result": "1:58.06",
+          "result_seconds": 118.06,
+          "location": "Санкт-Петербург",
+          "date": "2026-04-19",
+          "date_original": "19.04.2026"
         },
         {
           "discipline": "комплексное плавание 200 м",
@@ -239,13 +239,13 @@
           "distance_m": 200,
           "stroke_id": "im",
           "is_25m_pool": false,
-          "athlete": "Сорокина Анастасия",
+          "athlete": "Блинова Виктория",
           "roster": null,
-          "result": "2:12.90",
-          "result_seconds": 132.9,
-          "location": "Казань",
-          "date": "2021-04-05",
-          "date_original": "05.04.2021"
+          "result": "2:12.60",
+          "result_seconds": 132.6,
+          "location": "Санкт-Петербург",
+          "date": "2026-04-20",
+          "date_original": "20.04.2026"
         },
         {
           "discipline": "вольный стиль 400 м",
@@ -273,13 +273,13 @@
           "distance_m": 400,
           "stroke_id": "im",
           "is_25m_pool": false,
-          "athlete": "Сорокина Анастасия",
+          "athlete": "Блинова Виктория",
           "roster": null,
-          "result": "4:43.44",
-          "result_seconds": 283.44,
-          "location": "Казань",
-          "date": "2021-04-03",
-          "date_original": "03.04.2021"
+          "result": "4:38.48",
+          "result_seconds": 278.48,
+          "location": "Санкт-Петербург",
+          "date": "2026-04-21",
+          "date_original": "21.04.2026"
         },
         {
           "discipline": "вольный стиль 800 м",
@@ -309,11 +309,11 @@
           "is_25m_pool": false,
           "athlete": "Мишарина Ксения",
           "roster": null,
-          "result": "16:04.21",
-          "result_seconds": 964.21,
-          "location": "Казань",
-          "date": "2025-04-17",
-          "date_original": "17.04.2025"
+          "result": "16:03.42",
+          "result_seconds": 963.42,
+          "location": "Санкт-Петербург",
+          "date": "2026-04-17",
+          "date_original": "17.04.2026"
         },
         {
           "discipline": "4 х 100 м вольный стиль",
@@ -1028,11 +1028,11 @@
           "is_25m_pool": false,
           "athlete": "Щербаков Михаил",
           "roster": null,
-          "result": "1:57.25",
-          "result_seconds": 117.25,
-          "location": "Отопени",
-          "date": "2025-08-20",
-          "date_original": "20.08.2025"
+          "result": "1:57.12",
+          "result_seconds": 117.12,
+          "location": "Санкт-Петербург",
+          "date": "2026-04-18",
+          "date_original": "18.04.2026"
         },
         {
           "discipline": "вольный стиль 400 м",
@@ -1045,11 +1045,11 @@
           "is_25m_pool": false,
           "athlete": "Вековищев Григорий",
           "roster": null,
-          "result": "3:46.64",
-          "result_seconds": 226.64,
-          "location": "Отопени",
-          "date": "2025-08-19",
-          "date_original": "19.08.2025"
+          "result": "3:46.16",
+          "result_seconds": 226.16,
+          "location": "Санкт-Петербург",
+          "date": "2026-04-19",
+          "date_original": "19.04.2026"
         },
         {
           "discipline": "комплексное плавание 400 м",
