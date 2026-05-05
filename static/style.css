@@ -175,43 +175,6 @@ a:hover { text-decoration: underline; }
 }
 .stat-pill strong { font-weight: 700; font-size: 15px; }
 
-/* Tabs inside hero */
-.hero-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  margin-top: 20px;
-  border-bottom: none;
-}
-.tab {
-  appearance: none;
-  border: none;
-  background: rgba(255,255,255,.12);
-  color: rgba(255,255,255,.75);
-  padding: 9px 16px;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  font: inherit;
-  font-size: 13.5px;
-  font-weight: 500;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: background .14s, color .14s;
-}
-.tab:hover { background: rgba(255,255,255,.2); color: #fff; }
-.tab.active {
-  background: var(--surface);
-  color: var(--accent);
-  border-bottom-color: transparent;
-  font-weight: 600;
-}
-[data-theme="dark"] .tab.active { color: var(--accent); }
-.tab .count {
-  font-weight: 400;
-  font-size: 11.5px;
-  opacity: .7;
-  margin-left: 3px;
-}
-.tab.active .count { opacity: 1; }
 
 /* ── Container below hero ── */
 .container {
@@ -286,6 +249,15 @@ a:hover { text-decoration: underline; }
 }
 .filter-group {
   display: contents;
+}
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  align-self: center;
+  white-space: nowrap;
 }
 .filter-sep {
   width: 1px;
@@ -534,7 +506,7 @@ table.records tbody tr:hover { background: var(--surface-hover); }
   @page { size: A4; margin: 14mm 10mm; }
 
   .site-hero .hero-actions,
-  .controls, .filters, .hero-tabs,
+  .controls, .filters,
   .meta-bar, .footer,
   .stat-row { display: none !important; }
 
@@ -631,3 +603,27 @@ table.records tbody tr:hover { background: var(--surface-hover); }
 }
 
 .download-menu-panel a.loading { pointer-events: none; opacity: 0.5; }
+
+/* ── Download toast ── */
+.dl-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: var(--surface);
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  z-index: 1000;
+  white-space: nowrap;
+}
+.dl-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
