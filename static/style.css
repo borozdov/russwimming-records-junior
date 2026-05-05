@@ -138,6 +138,16 @@ a:hover { text-decoration: underline; }
   line-height: 1.2;
 }
 .site-title .flag { font-size: 1.3em; }
+.site-badge {
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 999px;
+  padding: 3px 11px;
+  letter-spacing: .01em;
+  vertical-align: middle;
+}
 .site-subtitle {
   margin-top: 6px;
   color: rgba(255,255,255,.7);
