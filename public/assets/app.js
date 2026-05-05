@@ -6,7 +6,6 @@
   const DATA = JSON.parse(dataEl.textContent);
 
   const state = {
-    categoryId: "all",
     search: "",
     filters: {
       sex: "all",        // all | women | men | mixed
@@ -21,7 +20,6 @@
   try {
     const saved = JSON.parse(localStorage.getItem(LS_KEY) || "null");
     if (saved && typeof saved === "object") {
-      if (saved.categoryId) state.categoryId = saved.categoryId;
       if (saved.filters) Object.assign(state.filters, saved.filters);
       if (saved.sort) state.sort = saved.sort;
     }
@@ -62,27 +60,6 @@
     });
   }
 
-  // --- Tabs ---
-  const tabsEl = document.getElementById("tabs");
-  const renderTabs = () => {
-    const tabs = [
-      { id: "all", title: "Все", count: allRecords.length },
-      ...categories.map((c) => ({ id: c.id, title: c.title, count: c.records.length })),
-    ];
-    tabsEl.innerHTML = tabs.map((t) => `
-      <button class="tab ${t.id === state.categoryId ? "active" : ""}" data-id="${t.id}">
-        ${t.title}<span class="count">${t.count}</span>
-      </button>
-    `).join("");
-    tabsEl.querySelectorAll(".tab").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        state.categoryId = btn.dataset.id;
-        persist();
-        render();
-      });
-    });
-  };
-
   // --- Filters ---
   const filterGroups = [
     { key: "sex",    label: "Пол",    options: [["all","Все"],["women","Женщины"],["men","Мужчины"],["mixed","Смешанные"]] },
@@ -93,10 +70,11 @@
   const filtersEl = document.getElementById("filters");
   const renderFilters = () => {
     filtersEl.innerHTML = filterGroups.map((g, i) =>
-      (i > 0 ? '<span class="filter-sep" aria-hidden="true"></span>' : "") +
+      `<span class="filter-label">${g.label}</span>` +
       g.options.map(([v, l]) => `
-        <button class="chip ${state.filters[g.key] === v ? "active" : ""}" data-group="${g.key}" data-value="${v}" title="${g.label}">${l}</button>
-      `).join("")
+        <button class="chip ${state.filters[g.key] === v ? "active" : ""}" data-group="${g.key}" data-value="${v}">${l}</button>
+      `).join("") +
+      (i < filterGroups.length - 1 ? '<span class="filter-sep" aria-hidden="true"></span>' : "")
     ).join("");
     filtersEl.querySelectorAll(".chip").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -155,9 +133,7 @@
     return true;
   };
 
-  const baseRecords = () => state.categoryId === "all"
-    ? allRecords
-    : allRecords.filter((r) => r._category_id === state.categoryId);
+  const baseRecords = () => allRecords;
 
   const sortRecords = (records) => {
     const { key, dir } = state.sort;
@@ -195,7 +171,7 @@
 
   const renderTable = () => {
     const visible = sortRecords(baseRecords().filter(matches));
-    const showCat = state.categoryId === "all";
+    const showCat = true;
     const cols = [
       { key: "discipline", label: "Дисциплина" },
       ...(showCat ? [{ key: "category", label: "Категория" }] : []),
@@ -253,9 +229,19 @@
   }[c]));
 
   const render = () => {
-    renderTabs();
     renderFilters();
     renderTable();
+  };
+
+  // --- Toast ---
+  const toastEl = document.getElementById("dl-toast");
+  let toastTimer = null;
+  const showToast = (msg = "Скачивание началось, ждите…") => {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3000);
   };
 
   // --- Download menu ---
@@ -270,6 +256,12 @@
       if (!dlMenu.contains(e.target)) dlMenu.classList.remove("open");
     });
   }
+
+  // Toast on static file downloads (JSON, CSV, XLSX, MD, TXT)
+  document.querySelectorAll(".download-menu-panel a[download]").forEach((a) => {
+    a.addEventListener("click", () => { if (dlMenu) dlMenu.classList.remove("open"); showToast(); });
+  });
+
   const setPrintDate = () => {
     const sig = document.querySelector(".print-signature .print-date");
     if (sig) sig.textContent = "Распечатано " + new Date().toLocaleDateString("ru-RU");
@@ -288,11 +280,7 @@
 
   const getVisibleRecords = () => sortRecords(baseRecords().filter(matches));
 
-  const getActiveCategoryTitle = () => {
-    if (state.categoryId === "all") return "Все категории";
-    const c = categories.find((x) => x.id === state.categoryId);
-    return c ? c.title : "Все категории";
-  };
+  const getActiveCategoryTitle = () => "Рекорды России (юниоры)";
 
   const getActiveFiltersText = () => {
     const parts = [];
@@ -354,7 +342,7 @@
     const CARD_PAD  = 0;
     const tableW    = W - PAD * 2;
 
-    const showCat = state.categoryId === "all";
+    const showCat = true;
     const cols = showCat
       ? [
           { label: "Дисциплина",  w: 210 },
@@ -582,16 +570,16 @@
 
         // Result — gold pill for top result highlight
         const isBest = i === 0;
-        const resultX = cols[ci].x + cols[ci].w - 6;
         const resultStr = rec.result;
         ctx.font = `700 14px ${MONO}`;
-        const rw = ctx.measureText(resultStr).width + 20;
-        const rpx = resultX - rw;
+        const rtw = ctx.measureText(resultStr).width;
+        const rw = rtw + 32;
+        const rpx = cols[ci].x + cols[ci].w - 6 - rw;
         roundRect(ctx, rpx, mid - 14, rw, 28, 7);
         ctx.fillStyle = isBest ? "#fff3cd" : "#eef3fb"; ctx.fill();
         ctx.fillStyle = isBest ? "#b35900" : "#0057b8";
-        ctx.textAlign = "right"; ctx.textBaseline = "middle";
-        ctx.fillText(resultStr, resultX - 4, mid);
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(resultStr, rpx + rw / 2, mid);
         ctx.textAlign = "left"; ctx.textBaseline = "top";
         ci++;
 
@@ -700,6 +688,7 @@
       pngBusy = true;
       dlPngBtn.classList.add("loading");
       dlMenu.classList.remove("open");
+      showToast("Создаём PNG, ждите…");
       try {
         const canvas = renderShareCanvas();
         const blob = await canvasToBlob(canvas);
@@ -729,6 +718,7 @@
       pdfBusy = true;
       dlPdfBtn.classList.add("loading");
       dlMenu.classList.remove("open");
+      showToast("Создаём PDF, ждите…");
       try {
         if (!window.jspdf) {
           await new Promise((res, rej) => {
