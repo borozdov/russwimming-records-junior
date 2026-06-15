@@ -1,6 +1,6 @@
 {
   "source_url": "https://russwimming.ru/records/junior/",
-  "fetched_at": "2026-06-14T09:20:44Z",
+  "fetched_at": "2026-06-15T11:49:09Z",
   "total_records": 91,
   "categories": [
     {
@@ -137,13 +137,13 @@
           "distance_m": 100,
           "stroke_id": "freestyle",
           "is_25m_pool": false,
-          "athlete": "Клепикова Дарья",
+          "athlete": "Манохина Кира",
           "roster": null,
-          "result": "54.45",
-          "result_seconds": 54.45,
+          "result": "54.18",
+          "result_seconds": 54.18,
           "location": "Казань",
-          "date": "2022-04-26",
-          "date_original": "26.04.2022"
+          "date": "2026-06-10",
+          "date_original": "10.06.2026"
         },
         {
           "discipline": "вольный стиль 100 м",
@@ -154,13 +154,13 @@
           "distance_m": 100,
           "stroke_id": "freestyle",
           "is_25m_pool": false,
-          "athlete": "Опёнышева Арина",
+          "athlete": "Клепикова Дарья",
           "roster": null,
           "result": "54.45",
           "result_seconds": 54.45,
-          "location": "Баку",
-          "date": "2015-06-24",
-          "date_original": "24.06.2015"
+          "location": "Казань",
+          "date": "2022-04-26",
+          "date_original": "26.04.2022"
         },
         {
           "discipline": "на спине 200 м",
