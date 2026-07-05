@@ -1,7 +1,7 @@
 {
   "source_url": "https://russwimming.ru/records/junior/",
-  "fetched_at": "2026-07-04T08:26:14Z",
-  "total_records": 91,
+  "fetched_at": "2026-07-05T08:42:30Z",
+  "total_records": 90,
   "categories": [
     {
       "id": "women-lcm",
@@ -144,23 +144,6 @@
           "location": "Казань",
           "date": "2026-06-10",
           "date_original": "10.06.2026"
-        },
-        {
-          "discipline": "вольный стиль 100 м",
-          "relay": false,
-          "relay_count": null,
-          "leg_distance_m": null,
-          "total_distance_m": 100,
-          "distance_m": 100,
-          "stroke_id": "freestyle",
-          "is_25m_pool": false,
-          "athlete": "Клепикова Дарья",
-          "roster": null,
-          "result": "54.45",
-          "result_seconds": 54.45,
-          "location": "Казань",
-          "date": "2022-04-26",
-          "date_original": "26.04.2022"
         },
         {
           "discipline": "на спине 200 м",
