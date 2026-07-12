@@ -1,6 +1,6 @@
 {
   "source_url": "https://russwimming.ru/records/junior/",
-  "fetched_at": "2026-07-11T07:42:23Z",
+  "fetched_at": "2026-07-12T08:03:18Z",
   "total_records": 90,
   "categories": [
     {
@@ -139,11 +139,11 @@
           "is_25m_pool": false,
           "athlete": "Манохина Кира",
           "roster": null,
-          "result": "54.18",
-          "result_seconds": 54.18,
-          "location": "Казань",
-          "date": "2026-06-10",
-          "date_original": "10.06.2026"
+          "result": "54.07",
+          "result_seconds": 54.07,
+          "location": "Мюнхен",
+          "date": "2026-07-10",
+          "date_original": "10.07.2026"
         },
         {
           "discipline": "на спине 200 м",
@@ -1140,16 +1140,16 @@
           "is_25m_pool": false,
           "athlete": "Сборная России",
           "roster": [
+            "Торопкин Богдан",
             "Щербаков Михаил",
-            "Вековищев Григорий",
-            "Бабинич Егор",
-            "Черепков Андрей"
+            "Вишняков Савелий",
+            "Вековищев Григорий"
           ],
-          "result": "7:10.39",
-          "result_seconds": 430.39,
-          "location": "Отопени",
-          "date": "2025-08-22",
-          "date_original": "22.08.2025"
+          "result": "7:09.16",
+          "result_seconds": 429.16,
+          "location": "Мюнхен",
+          "date": "2026-07-11",
+          "date_original": "11.07.2026"
         }
       ]
     },
