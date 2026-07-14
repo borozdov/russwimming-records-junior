@@ -1,6 +1,6 @@
 {
   "source_url": "https://russwimming.ru/records/junior/",
-  "fetched_at": "2026-07-13T08:53:06Z",
+  "fetched_at": "2026-07-14T07:49:19Z",
   "total_records": 90,
   "categories": [
     {
@@ -1028,11 +1028,11 @@
           "is_25m_pool": false,
           "athlete": "Вековищев Григорий",
           "roster": null,
-          "result": "3:46.16",
-          "result_seconds": 226.16,
-          "location": "Санкт-Петербург",
-          "date": "2026-04-19",
-          "date_original": "19.04.2026"
+          "result": "3:44.58",
+          "result_seconds": 224.57999999999998,
+          "location": "Мюнхен",
+          "date": "2026-07-12",
+          "date_original": "12.07.2026"
         },
         {
           "discipline": "комплексное плавание 400 м",
