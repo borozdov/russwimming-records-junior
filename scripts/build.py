@@ -388,15 +388,17 @@ INDEX_TEMPLATE = """<!doctype html>
 
 <header class="site-header">
   <div class="shell header-inner">
-    <a class="wordmark" href="/">Рекорды России<span class="wordmark-sub">Плавание · Юниоры</span></a>
-    <a class="header-by" href="https://borozdov.ru" rel="noopener" target="_blank">By Borozdov</a>
+    <div class="brand">
+      <a class="wordmark" href="/">Рекорды России<span class="wordmark-sub">Плавание · Юниоры</span></a>
+      <a class="header-by" href="https://borozdov.ru" rel="noopener" target="_blank">By Borozdov</a>
+    </div>
     <div class="header-actions">
       <button class="icon-btn" id="theme-toggle" aria-label="Сменить лик"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
       <button class="btn btn-print" id="print-btn">Печать</button>
       <div class="dl" id="dl-menu">
-        <button class="btn btn-primary" id="dl-btn" aria-haspopup="true" aria-expanded="false">
+        <button class="btn btn-primary" id="dl-btn" aria-haspopup="true" aria-expanded="false" aria-label="Скачать">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 11l6 6 6-6M4 21h16"/></svg>
-          Скачать
+          <span class="btn-label">Скачать</span>
         </button>
         <div class="dl-panel">
           <a href="./records.json" download><span class="fmt">JSON</span><span class="hint">структурированные данные</span></a>
