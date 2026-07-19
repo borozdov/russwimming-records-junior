@@ -331,13 +331,17 @@ INDEX_TEMPLATE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>
-// Лик следует за средой; ручной выбор — с памятью (брендбук §1.5)
+// Лик: трёхтактный цикл обсидиан → титан → авто, ручной выбор — с памятью (брендбук §1.5)
 (function () {{
   try {{
     var s = localStorage.getItem("lik");
-    var lik = (s === "titan" || s === "obsidian") ? s :
-      (window.matchMedia("(prefers-color-scheme: light)").matches ? "titan" : "obsidian");
-    document.documentElement.setAttribute("data-theme", lik);
+    var mode = (s === "titan" || s === "obsidian") ? s : "auto";
+    var lik = mode === "auto"
+      ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "titan" : "obsidian")
+      : mode;
+    var root = document.documentElement;
+    root.setAttribute("data-theme", lik);
+    root.setAttribute("data-theme-mode", mode);
   }} catch (e) {{}}
 }})();
 </script>

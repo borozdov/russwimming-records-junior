@@ -62,6 +62,15 @@ body {
 
 :focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus-ring); }
 
+/* Мгновенная смена лика: static/app.js вешает этот класс на <html> на время
+   смены data-theme (с принудительным reflow между сменой и снятием) — иначе
+   ховерные transition на цветах устраивают «перелив» каскадом по странице */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--canvas); }
 ::-webkit-scrollbar-thumb { background: var(--strong); }

@@ -43,42 +43,65 @@
     }
   }
 
-  /* ── Лик: по умолчанию следует за средой, ручной выбор с памятью.
-     Иконка показывает, куда переключит клик: в тёмном — солнце, в светлом — луна. */
+  /* ── Лик: трёхтактный цикл обсидиан → титан → авто → обсидиан.
+     Сохраняется только ручной выбор («авто» = ключа нет); иконка показывает,
+     куда переключит клик (Sun/Monitor/Moon, брендбук — components.md). */
   const LIK_KEY = "lik";
   const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
   const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  const ICON_MONITOR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>';
+  const ICONS = { obsidian: ICON_SUN, titan: ICON_MONITOR, auto: ICON_MOON };
+  const NEXT_LABEL = { obsidian: "светлый лик", titan: "авто — следовать за системой", auto: "тёмный лик" };
+  const CYCLE = { obsidian: "titan", titan: "auto", auto: "obsidian" };
 
   const themeBtn = document.getElementById("theme-toggle");
+  const root = document.documentElement;
   const media = window.matchMedia("(prefers-color-scheme: light)");
-  const systemLik = () => (media.matches ? "titan" : "obsidian");
 
-  const applyLik = (lik) => {
-    document.documentElement.dataset.theme = lik;
+  const storedMode = () => {
+    let v = null;
+    try { v = localStorage.getItem(LIK_KEY); } catch (_) {}
+    return v === "obsidian" || v === "titan" ? v : "auto";
+  };
+  const resolve = (mode) => (mode === "auto" ? (media.matches ? "titan" : "obsidian") : mode);
+
+  let mode = storedMode();
+
+  const apply = (instant) => {
+    const lik = resolve(mode);
+    if (instant) root.classList.add("theme-switching");
+    root.dataset.theme = lik;
+    root.dataset.themeMode = mode;
+    if (instant) { void root.offsetHeight; root.classList.remove("theme-switching"); }
+
     document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
       m.removeAttribute("media");
       m.setAttribute("content", lik === "obsidian" ? "#0d0d0d" : "#fafafa");
     });
     if (themeBtn) {
-      themeBtn.innerHTML = lik === "obsidian" ? ICON_SUN : ICON_MOON;
-      themeBtn.setAttribute("aria-label", lik === "obsidian" ? "Светлый лик" : "Тёмный лик");
-      themeBtn.title = lik === "obsidian" ? "Светлый лик" : "Тёмный лик";
+      themeBtn.innerHTML = ICONS[mode];
+      const label = "Переключить: " + NEXT_LABEL[mode];
+      themeBtn.setAttribute("aria-label", label);
+      themeBtn.title = label;
     }
   };
 
-  let manualLik = null;
-  try { manualLik = localStorage.getItem(LIK_KEY); } catch (_) {}
-  if (manualLik !== "obsidian" && manualLik !== "titan") manualLik = null;
-  applyLik(manualLik || systemLik());
+  const persistLik = () => {
+    try {
+      if (mode === "auto") localStorage.removeItem(LIK_KEY);
+      else localStorage.setItem(LIK_KEY, mode);
+    } catch (_) {}
+  };
 
-  media.addEventListener("change", () => { if (!manualLik) applyLik(systemLik()); });
+  apply(false);
+  media.addEventListener("change", () => { if (mode === "auto") apply(false); });
+  window.addEventListener("storage", (e) => { if (e.key === LIK_KEY) { mode = storedMode(); apply(false); } });
 
   if (themeBtn) {
     themeBtn.addEventListener("click", () => {
-      const next = document.documentElement.dataset.theme === "obsidian" ? "titan" : "obsidian";
-      manualLik = next;
-      try { localStorage.setItem(LIK_KEY, next); } catch (_) {}
-      applyLik(next);
+      mode = CYCLE[mode];
+      persistLik();
+      apply(true);
     });
   }
 
