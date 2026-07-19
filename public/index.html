@@ -4,17 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>
-// Лик: трёхтактный цикл обсидиан → титан → авто, ручной выбор — с памятью (брендбук §1.5)
+// Лик: только ручной выбор, без слежения за системной темой. По умолчанию — обсидиан.
 (function () {
   try {
     var s = localStorage.getItem("lik");
-    var mode = (s === "titan" || s === "obsidian") ? s : "auto";
-    var lik = mode === "auto"
-      ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "titan" : "obsidian")
-      : mode;
-    var root = document.documentElement;
-    root.setAttribute("data-theme", lik);
-    root.setAttribute("data-theme-mode", mode);
+    var lik = (s === "titan" || s === "obsidian") ? s : "obsidian";
+    document.documentElement.setAttribute("data-theme", lik);
   } catch (e) {}
 })();
 </script>
@@ -38,8 +33,7 @@
 <meta name="twitter:title" content="Юношеские рекорды России по плаванию">
 <meta name="twitter:description" content="Действующие юношеские рекорды России по плаванию: личные и эстафетные, бассейны 50 и 25 м. Таблица обновляется ежедневно. Скачать бесплатно: JSON, CSV, XLSX, PDF.">
 <meta name="twitter:image" content="https://russwimming-records-junior.borozdov.ru/og-image.png">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0d0d">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafafa">
+<meta name="theme-color" content="#0d0d0d">
 <meta name="google-site-verification" content="qOwWmdq24kGcVTyxc1GL2W8TxQk63Z5lBH3NSv4hH4s" />
 <meta name="yandex-verification" content="80f947e774535d84" />
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23fafafa'/><text x='50' y='53' dominant-baseline='central' text-anchor='middle' font-family='Inter,Helvetica,Arial,sans-serif' font-weight='700' font-size='60' fill='%230d0d0d'>Ю</text></svg>">

@@ -331,17 +331,12 @@ INDEX_TEMPLATE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>
-// Лик: трёхтактный цикл обсидиан → титан → авто, ручной выбор — с памятью (брендбук §1.5)
+// Лик: только ручной выбор, без слежения за системной темой. По умолчанию — обсидиан.
 (function () {{
   try {{
     var s = localStorage.getItem("lik");
-    var mode = (s === "titan" || s === "obsidian") ? s : "auto";
-    var lik = mode === "auto"
-      ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "titan" : "obsidian")
-      : mode;
-    var root = document.documentElement;
-    root.setAttribute("data-theme", lik);
-    root.setAttribute("data-theme-mode", mode);
+    var lik = (s === "titan" || s === "obsidian") ? s : "obsidian";
+    document.documentElement.setAttribute("data-theme", lik);
   }} catch (e) {{}}
 }})();
 </script>
@@ -365,8 +360,7 @@ INDEX_TEMPLATE = """<!doctype html>
 <meta name="twitter:title" content="{og_title}">
 <meta name="twitter:description" content="{description}">
 <meta name="twitter:image" content="https://{domain}/og-image.png">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0d0d">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafafa">
+<meta name="theme-color" content="#0d0d0d">
 <meta name="google-site-verification" content="qOwWmdq24kGcVTyxc1GL2W8TxQk63Z5lBH3NSv4hH4s" />
 <meta name="yandex-verification" content="80f947e774535d84" />
 <link rel="icon" href="{favicon}">
