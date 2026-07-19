@@ -47,8 +47,10 @@ jobs:
                   public/sitemap.xml \
                   public/robots.txt \
                   public/404.html \
+                  public/og-image.png \
                   public/records.json \
                   public/records.csv \
+                  public/records.xlsx \
                   public/records.md \
                   public/records.txt
           git commit -m "data: update records $(date -u +%Y-%m-%d)"
