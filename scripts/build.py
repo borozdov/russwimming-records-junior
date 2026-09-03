@@ -637,7 +637,7 @@ PAGE_TEMPLATE = """<!doctype html>
 
 <main class="shell" id="main">
   <section class="hero">
-    <p class="label">{eyebrow}</p>
+    {eyebrow_html}
     <h1>{h1}</h1>
     <p class="hero-meta">{intro}</p>
     <div class="stat-strip">{stats_html}</div>
@@ -882,7 +882,7 @@ def render_page(*, data: dict, categories: list[dict], canonical: str, title: st
         favicon=FAVICON,
         jsonld=jsonld_graph(data, canonical, og_title, description, records, with_faq),
         source_url=html.escape(data["source_url"]),
-        eyebrow=html.escape(eyebrow),
+        eyebrow_html=f'<p class="label">{html.escape(eyebrow)}</p>' if eyebrow else "",
         h1=html.escape(h1),
         intro=intro,
         stats_html=build_stats(records, data, fetched_human),
@@ -917,7 +917,7 @@ def write_index(data: dict, out: Path, fetched_human: str) -> None:
         og_title=SITE_TITLE,
         description=SITE_TAGLINE,
         h1="Юношеские рекорды России по плаванию",
-        eyebrow="Официальное зеркало · Всероссийская федерация плавания",
+        eyebrow="",
         intro=intro,
         current="",
         fetched_human=fetched_human,
