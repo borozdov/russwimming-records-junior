@@ -13,6 +13,24 @@
 
   const SITE_URL = "russwimming-records-junior.borozdov.ru";
 
+  /* --- Метрика: цели ------------------------------------------------------
+     ym() — очередь-стаб, которую build.py создаёт синхронно в <head> (см. METRIKA
+     в build.py) специально ради этого: цели могут прилетать с первого клика,
+     раньше чем догрузится сам tag.js, и стаб копит их, не теряя. */
+  const goal = (name, params) => {
+    if (typeof window.ym !== "function" || !window.YM_COUNTER_ID) return;
+    try { window.ym(window.YM_COUNTER_ID, "reachGoal", name, params); } catch (_) {}
+  };
+
+  /* Переходы на borozdov.ru (шапка, подвал, ссылка в FAQ) — все три открываются
+     в новой вкладке (target="_blank"), поэтому цель успевает уйти без риска
+     оборвать переход; trackLinks:true уже пишет их как внешние ссылки сам по
+     себе, это — именованная цель поверх того же клика для отдельного отчёта */
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href*="borozdov.ru"]');
+    if (a) goal("brand_click", { from: a.className || "link" });
+  });
+
   /* --- Лик -------------------------------------------------------------- */
 
   const LIK_KEY = "lik";
@@ -50,6 +68,7 @@
     themeBtn.addEventListener("click", () => {
       lik = lik === "titan" ? "obsidian" : "titan";
       applyLik(true);
+      goal("theme_switch", { lik });
     });
   }
   window.addEventListener("storage", (e) => {
@@ -285,6 +304,7 @@
         btn.addEventListener("click", () => {
           state.filters[g.key] = state.filters[g.key] === value ? "all" : value;
           apply();
+          goal("filter", { group: g.key, value: state.filters[g.key] });
         });
         wrap.appendChild(btn);
         chips.set(`${g.key}:${value}`, btn);
@@ -310,6 +330,7 @@
     if (searchEl) searchEl.value = "";
     apply();
     if (searchEl) searchEl.focus();
+    goal("reset_filters");
   }
 
   const isDirty = () =>
@@ -402,9 +423,16 @@
 
   if (searchEl) {
     searchEl.value = state.search;
+    /* Цель — раз за «сессию» поиска (пауза 800мс в наборе), а не на каждую
+       клавишу: иначе один запрос даёт десяток одинаковых по смыслу целей */
+    let searchGoalTimer = 0;
     searchEl.addEventListener("input", () => {
       state.search = searchEl.value;
       apply();
+      clearTimeout(searchGoalTimer);
+      if (state.search.trim()) {
+        searchGoalTimer = setTimeout(() => goal("search", { length: state.search.trim().length }), 800);
+      }
     });
   }
 
@@ -440,6 +468,7 @@
         state.dir = 1;
       }
       apply();
+      if (state.sort) goal("sort", { column: state.sort, dir: state.dir });
     });
   });
 
@@ -567,7 +596,11 @@
       deferredPrompt = e;
       showInstall(true);
     });
-    window.addEventListener("appinstalled", () => { deferredPrompt = null; showInstall(false); });
+    window.addEventListener("appinstalled", () => {
+      deferredPrompt = null;
+      showInstall(false);
+      goal("pwa_install");
+    });
     /* iOS: события нет, есть только «Поделиться → На экран Домой» — подсказываем.
        iPadOS прикидывается Mac, выдаёт себя количеством точек касания */
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent)
@@ -1421,6 +1454,7 @@
       if (i < plan.pages.length - 1) await new Promise((r) => setTimeout(r, 400));
     }
     showToast(plan.pages.length > 1 ? `Готово: ${plan.pages.length} файла` : "Готово");
+    goal("export_done", { format: "png", pages: plan.pages.length });
   }));
 
   const pdfBtn = $("#export-pdf");
@@ -1451,6 +1485,7 @@
     });
     pdf.save(`records-${stamp()}.pdf`);
     showToast("Готово");
+    goal("export_done", { format: "pdf", pages: plan.pages.length });
   }));
 
   /* Пункты меню больше не скачивают молча, а открывают окно с превью */
@@ -1461,6 +1496,7 @@
       if (dlMenu) dlMenu.classList.remove("open");
       if (dlBtn) dlBtn.setAttribute("aria-expanded", "false");
       openExport(btn);
+      goal("export_open", { format: btn.id.includes("pdf") ? "pdf" : "png" });
     });
   };
   openFrom($("#dl-png-btn"));
