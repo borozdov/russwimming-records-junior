@@ -1,0 +1,126 @@
+{
+  "id": "https://russwimming-records-junior.borozdov.ru/",
+  "name": "Юношеские рекорды России по плаванию",
+  "short_name": "Юниоры",
+  "description": "Действующие юношеские рекорды России по плаванию: личные и эстафетные, бассейны 50 и 25 м. Таблица обновляется ежедневно. Скачать бесплатно: JSON, CSV, XLSX, PDF.",
+  "lang": "ru",
+  "dir": "ltr",
+  "start_url": "/?utm_source=pwa&utm_medium=homescreen",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "categories": [
+    "sports",
+    "reference"
+  ],
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  },
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Женщины, бассейн 50 м",
+      "short_name": "Жен. 50 м",
+      "url": "/women-lcm/?utm_source=pwa&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Женщины, бассейн 25 м",
+      "short_name": "Жен. 25 м",
+      "url": "/women-scm/?utm_source=pwa&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Мужчины, бассейн 50 м",
+      "short_name": "Муж. 50 м",
+      "url": "/men-lcm/?utm_source=pwa&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Мужчины, бассейн 25 м",
+      "short_name": "Муж. 25 м",
+      "url": "/men-scm/?utm_source=pwa&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Смешанные эстафеты",
+      "short_name": "Микст",
+      "url": "/mixed/?utm_source=pwa&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Таблица рекордов на телефоне"
+    },
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Таблица рекордов на компьютере"
+    }
+  ]
+}

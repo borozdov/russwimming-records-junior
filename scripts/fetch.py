@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -39,11 +41,25 @@ STROKES = [
 ]
 
 
-def fetch_html(url: str) -> str:
-    r = requests.get(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "ru,en;q=0.8"}, timeout=30)
-    r.raise_for_status()
-    r.encoding = r.apparent_encoding or "utf-8"
-    return r.text
+def fetch_html(url: str, attempts: int = 3) -> str:
+    """Источник иногда отдаёт 5xx или обрывает соединение — пробуем ещё раз."""
+    for attempt in range(1, attempts + 1):
+        try:
+            r = requests.get(
+                url,
+                headers={"User-Agent": USER_AGENT, "Accept-Language": "ru,en;q=0.8"},
+                timeout=30,
+            )
+            r.raise_for_status()
+            r.encoding = r.apparent_encoding or "utf-8"
+            return r.text
+        except requests.RequestException as e:
+            if attempt == attempts:
+                raise
+            wait = 2 ** attempt
+            print(f"попытка {attempt}/{attempts} не удалась ({e}) — ждём {wait}s")
+            time.sleep(wait)
+    raise RuntimeError("unreachable")
 
 
 def result_to_seconds(raw: str) -> float | None:
@@ -159,35 +175,81 @@ def parse_records_from_html(html: str) -> list[dict]:
     return categories
 
 
+def load_prior() -> dict | None:
+    if not OUT.exists():
+        return None
+    try:
+        return json.loads(OUT.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def check_sanity(categories: list[dict], prior: dict | None) -> None:
+    """Источник может отдать 5 таблиц, но с обрезанным содержимым.
+
+    Такой ответ проходит все структурные проверки и молча затирает верные данные,
+    поэтому сверяемся с прошлым объёмом.
+    """
+    total = sum(len(c["records"]) for c in categories)
+    if not prior:
+        return
+    was = prior.get("total_records") or 0
+    if was and total < was * 0.9:
+        raise RuntimeError(
+            f"рекордов стало {total} вместо {was} (−{100 - total * 100 // was}%) — "
+            "похоже на частичный ответ источника, данные не трогаем"
+        )
+
+
+def report_unknown(categories: list[dict]) -> None:
+    unknown = [
+        r["discipline"] for c in categories for r in c["records"]
+        if r["stroke_id"] == "unknown"
+    ]
+    if unknown:
+        print(f"warning: стиль не распознан у {len(unknown)} записей — источник сменил формулировки?")
+        for d in unknown[:5]:
+            print(f"  · {d}")
+
+
+def emit_flag(changed: bool) -> None:
+    """Флаг для workflow: сборка и коммит запускаются только при изменениях."""
+    out = os.environ.get("GITHUB_OUTPUT")
+    if out:
+        with open(out, "a", encoding="utf-8") as f:
+            f.write(f"changed={'true' if changed else 'false'}\n")
+
+
 def main() -> int:
     html = fetch_html(SOURCE_URL)
     categories = parse_records_from_html(html)
     total = sum(len(c["records"]) for c in categories)
-    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    report_unknown(categories)
 
-    prior_categories = None
-    if OUT.exists():
-        try:
-            prior = json.loads(OUT.read_text(encoding="utf-8"))
-            prior_categories = prior.get("categories")
-        except (json.JSONDecodeError, OSError):
-            pass
+    prior = load_prior()
+    check_sanity(categories, prior)
+    changed = (prior or {}).get("categories") != categories
 
-    payload = {
-        "source_url": SOURCE_URL,
-        "fetched_at": now_iso,
-        "total_records": total,
-        "categories": categories,
-    }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
-        encoding="utf-8",
-    )
-    changed = prior_categories != categories
+    # Файл переписываем только при реальных изменениях: иначе меняется один
+    # fetched_at, а следом пересобирается весь сайт — и в историю рекордов
+    # попадает ежедневный шум вместо самих рекордов
+    if changed:
+        payload = {
+            "source_url": SOURCE_URL,
+            "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "total_records": total,
+            "categories": categories,
+        }
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        OUT.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
+            encoding="utf-8",
+        )
+
+    emit_flag(changed)
     print(
-        f"wrote {OUT.relative_to(ROOT)} ({total} records across {len(categories)} categories) "
-        f"— {'CHANGED' if changed else 'no changes'}"
+        f"{OUT.relative_to(ROOT)}: {total} records across {len(categories)} categories "
+        f"— {'CHANGED, файл перезаписан' if changed else 'без изменений, файл не тронут'}"
     )
     return 0
 
