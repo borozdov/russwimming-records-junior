@@ -9,15 +9,18 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
+# Прерванный посреди git push прогон — сорванный деплой: коммит public/ в main
+# и есть деплой (Timeweb Apps выкладывает его автоматически), поэтому не отменяем
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: update
+  cancel-in-progress: false
+
+env:
+  REPO_URL: ${{ github.server_url }}/${{ github.repository }}
 
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,48 +33,28 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Test
+        run: python -m unittest discover -s tests
+
       - name: Fetch records
         run: python scripts/fetch.py
 
+      # Сборку гоняем всегда: данные могли не измениться, но код — мог
       - name: Build site
         run: python scripts/build.py
 
+      # Коммит public/ — это и есть деплой: Timeweb Apps (static-nobuild,
+      # index_dir=/public) пересобирает сайт по вебхуку на каждый push в main
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/junior.json \
-                  public/index.html \
-                  public/assets/style.css \
-                  public/assets/app.js \
-                  public/sitemap.xml \
-                  public/robots.txt \
-                  public/404.html \
-                  public/og-image.png \
-                  public/records.json \
-                  public/records.csv \
-                  public/records.xlsx \
-                  public/records.md \
-                  public/records.txt
-          git commit -m "data: update records $(date -u +%Y-%m-%d)"
-          git push
-
-  deploy:
-    needs: update
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: public/
-
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          git add data/junior.json public README.md
+          # Без этой проверки шаг падает на пустом коммите: fetch.py намеренно
+          # не трогает json, когда данные не изменились
+          if git diff --cached --quiet; then
+            echo "нечего коммитить"
+          else
+            git commit -m "data: update records $(date -u +%Y-%m-%d)"
+            git push
+          fi
