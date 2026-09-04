@@ -238,6 +238,7 @@ class HeadLinks(unittest.TestCase):
     def test_template_links_every_icon(self):
         head = build.PAGE_TEMPLATE
         for needle in ('rel="apple-touch-icon" href="/apple-touch-icon.png"',
+                       'rel="icon" type="image/svg+xml" href="/favicon.svg"',
                        'rel="icon" href="/favicon.ico"',
                        'rel="manifest" href="/site.webmanifest"',
                        '<meta name="mobile-web-app-capable" content="yes">',
