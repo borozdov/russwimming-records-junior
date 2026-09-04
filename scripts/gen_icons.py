@@ -150,12 +150,18 @@ def render(outdir: Path, letter: str) -> list[str]:
     # ищут по /favicon.ico молча, не заглядывая в <link>. Три размера в одном
     # файле: 16 для вкладки, 32 для ретины, 48 для панели закладок Windows.
     favicon(48, letter).save(outdir / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+    # Яндексу для карточки в поиске нужен фавикон файлом по прямой ссылке (SVG
+    # или 120×120) — растровый PNG, а не живой SVG-текст: браузер рисует
+    # фавикон вкладки системными шрифтами, веб-шрифт страницы (Inter) туда не
+    # грузится, и текст в SVG уезжал бы в фолбэк другой насыщенности прямо на
+    # вкладке. PNG печёт нужный вес шрифта один раз здесь.
+    favicon(120, letter).save(outdir / "favicon-120.png")
     app_icon(180, letter).save(outdir / "apple-touch-icon.png")
     for size in (192, 512):
         app_icon(size, letter).save(outdir / f"icon-{size}.png")
     app_icon(512, letter, maskable=True).save(outdir / "icon-maskable-512.png")
 
-    names = ["favicon.ico", "apple-touch-icon.png",
+    names = ["favicon.ico", "favicon-120.png", "apple-touch-icon.png",
              "icon-192.png", "icon-512.png", "icon-maskable-512.png"]
     (outdir / "splash").mkdir(exist_ok=True)
     for item in splash_set():

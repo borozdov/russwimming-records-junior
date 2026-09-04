@@ -238,17 +238,12 @@ class HeadLinks(unittest.TestCase):
     def test_template_links_every_icon(self):
         head = build.PAGE_TEMPLATE
         for needle in ('rel="apple-touch-icon" href="/apple-touch-icon.png"',
-                       'rel="icon" type="image/svg+xml" href="/favicon.svg"',
+                       'rel="icon" type="image/png" sizes="120x120" href="/favicon-120.png"',
                        'rel="icon" href="/favicon.ico"',
                        'rel="manifest" href="/site.webmanifest"',
                        '<meta name="mobile-web-app-capable" content="yes">',
                        '<meta name="apple-mobile-web-app-capable" content="yes">'):
             self.assertIn(needle, head, needle)
-
-    def test_svg_favicon_has_explicit_baseline(self):
-        """dominant-baseline считается от метрик шрифта, а фавикон их не грузит."""
-        self.assertNotIn("dominant-baseline", build.FAVICON)
-        self.assertIn("y='72.5'", build.FAVICON)
 
 
 if __name__ == "__main__":
