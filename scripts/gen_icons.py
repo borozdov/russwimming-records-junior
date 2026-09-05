@@ -41,8 +41,45 @@ SPLASH_LETTER = 0.12
 STROKE = 0.015      # обводка контура, доля канвы: Bold 700 → визуально 800
 PLATE_RADIUS = 0.16
 
+# Оптическая компенсация ширины. Равная высота — ещё не равный размер: «Ю»
+# занимает 76% ширины канвы, «L» на соседней вкладке — 40%, и узкая литера
+# читается заметно мельче широкой при той же высоте. Узкие поднимаем, широкие
+# опускаем, приводя к общему sqrt(ширина × высота) — оптической площади знака.
+#
+# REF_ASPECT — литера, которая получает роль в чистом виде, без поправки; 0.80 —
+# это примерно «Р» и «B», середина шкалы. K — сила поправки: 0 выключает её,
+# 1 равняет площадь в точности, но тогда «Ю» проваливается по высоте, а «L»
+# лезет вверх. 0.7 снимает разнобой и оставляет литеры одного роя. Значения —
+# константы бренда, они же в BRAND.md и в tools/brand-icons/render.py.
+REF_ASPECT = 0.80
+OPTICAL_K = 0.7
+
 # Кегль-затравка: доля капители Inter (capHeight 1490 / upm 2048).
 CAP_RATIO = 1490 / 2048
+
+_ASPECT: dict[str, float] = {}
+
+
+def aspect(letter: str) -> float:
+    """Ширина очка к его высоте.
+
+    Меряется по контуру без обводки: она даёт одинаковую прибавку по обеим осям
+    и только смазывала бы пропорцию.
+    """
+    if letter not in _ASPECT:
+        font = gen_og.load_font(gen_og.SANS_BOLD_CANDIDATES, 512)
+        layer = Image.new("L", (1536, 1536), 0)
+        ImageDraw.Draw(layer).text((512, 512), letter, font=font, fill=255)
+        box = layer.getbbox()
+        if box is None:
+            raise RuntimeError(f"шрифт не содержит литеру {letter!r}")
+        _ASPECT[letter] = (box[2] - box[0]) / (box[3] - box[1])
+    return _ASPECT[letter]
+
+
+def ink_ratio(letter: str, role: float) -> float:
+    """Доля высоты канвы под краску: роль плюс поправка на ширину литеры."""
+    return role * (REF_ASPECT / aspect(letter)) ** (OPTICAL_K / 2)
 
 # Логические размеры экранов (pt) и масштаб. Единственный источник и для файлов
 # в public/splash/, и для тегов <link rel="apple-touch-startup-image"> в build.py:
@@ -94,10 +131,10 @@ def letter_mask(letter: str, target_ink_h: float, stroke: int, canvas: int) -> I
     return layer.crop(box)
 
 
-def draw_letter(img: Image.Image, letter: str, ratio: float) -> None:
+def draw_letter(img: Image.Image, letter: str, role: float) -> None:
     w, h = img.size
     base = min(w, h)   # у сплэша канва не квадратная — литера считается от меньшей стороны
-    mask = letter_mask(letter, ratio * base, round(STROKE * base), base)
+    mask = letter_mask(letter, ink_ratio(letter, role) * base, round(STROKE * base), base)
     img.paste(MARK, ((w - mask.width) // 2, (h - mask.height) // 2), mask)
 
 

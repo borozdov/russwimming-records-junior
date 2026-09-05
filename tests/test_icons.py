@@ -104,16 +104,32 @@ class Materials(unittest.TestCase):
         for corner in ((0, 0), (179, 0), (0, 179), (179, 179)):
             self.assertEqual(img.getpixel(corner), SURFACE)
 
-    def test_letter_is_one_height_across_roles(self):
-        """Фавикон и иконка приложения несут литеру одного роста.
-
-        Это то, что держит набор единым между сайтами: рост задан долей краски,
-        а не кеглем, поэтому «Р», «Ю» и «B» встают одинаково.
-        """
-        for img, expected in ((gen_icons.favicon(512, LETTER), gen_icons.FAVICON_LETTER),
-                              (gen_icons.app_icon(512, LETTER), gen_icons.APP_LETTER)):
+    def test_letter_is_one_size_across_roles(self):
+        """Фавикон и иконка приложения несут литеру одного размера."""
+        heights = []
+        for img, role in ((gen_icons.favicon(512, LETTER), gen_icons.FAVICON_LETTER),
+                          (gen_icons.app_icon(512, LETTER), gen_icons.APP_LETTER)):
             top, bottom, _, _ = ink_box(img)
-            self.assertAlmostEqual(100 - top - bottom, expected * 100, delta=1.5)
+            heights.append(100 - top - bottom)
+            self.assertAlmostEqual(heights[-1],
+                                   gen_icons.ink_ratio(LETTER, role) * 100, delta=1.5)
+        self.assertAlmostEqual(heights[0], heights[1], delta=1.0)
+
+    def test_narrow_letters_are_not_smaller_than_wide_ones(self):
+        """Одна высота — ещё не один размер.
+
+        «Ю» занимает 76% ширины канвы, «L» на соседней вкладке — 40%, и при
+        равной высоте узкая литера читается заметно мельче. Поэтому размером
+        считается оптическая площадь знака, sqrt(ширина × высота), и она обязана
+        сходиться между всеми литерами бренда — иначе сайты в полосе вкладок
+        снова разъедутся.
+        """
+        sizes = []
+        for letter in "ЮРДBFL":
+            top, bottom, left, right = ink_box(gen_icons.app_icon(512, letter))
+            sizes.append(((100 - top - bottom) * (100 - left - right)) ** 0.5)
+        self.assertLess(max(sizes) / min(sizes) - 1, 0.10,
+                        f"размер знака расходится: {[round(s, 1) for s in sizes]}")
 
     def test_missing_glyph_raises(self):
         with self.assertRaises(RuntimeError):
