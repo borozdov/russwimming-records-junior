@@ -56,7 +56,7 @@ SPLASH_SIZES = [
 IPAD_MIN_WIDTH = 744
 
 
-def draw_letter(img: Image.Image, letter: str, color, scale: float) -> None:
+def draw_letter(img: Image.Image, letter: str, color, scale: float, bold: bool = False) -> None:
     """Литера по центру фактического очка, а не по метрикам шрифта.
 
     Меряем в два прохода: рисуем литеру на отдельном слое и берём его
@@ -68,11 +68,15 @@ def draw_letter(img: Image.Image, letter: str, color, scale: float) -> None:
 
     Для «Р» с плоским верхом и плоской базовой линией геометрический центр
     очка и есть оптический — дополнительный подъём здесь не нужен (он нужен
-    литерам с овалами, у которых есть свес за пределы капители).
+    литерам с овалами, у которых есть свес за пределы капители). Двухпроходный
+    getbbox() центрует любую литеру одинаково надёжно, поэтому bold=True (для
+    «Ю» — см. gen_og.SANS_BOLD_CANDIDATES) не требует отдельной перепроверки
+    центровки: контур другой, а метод её нахождения — тот же.
     """
     w, h = img.size
     size = min(w, h)   # у сплэша канва не квадратная — литера считается от меньшей стороны
-    font = gen_og.load_font(gen_og.SANS_CANDIDATES, int(size * scale))
+    candidates = gen_og.SANS_BOLD_CANDIDATES if bold else gen_og.SANS_CANDIDATES
+    font = gen_og.load_font(candidates, int(size * scale))
 
     layer = Image.new("L", (size * 2, size * 2), 0)
     ImageDraw.Draw(layer).text((size // 2, size // 2), letter, font=font, fill=255)
@@ -84,16 +88,16 @@ def draw_letter(img: Image.Image, letter: str, color, scale: float) -> None:
     img.paste(color, ((w - mask.width) // 2, (h - mask.height) // 2), mask)
 
 
-def favicon(size: int, letter: str) -> Image.Image:
+def favicon(size: int, letter: str, bold: bool = False) -> Image.Image:
     """Титановый квадрат rx 16% + обсидиановая литера."""
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     ImageDraw.Draw(img).rounded_rectangle(
         (0, 0, size - 1, size - 1), radius=round(size * 0.16), fill=TITAN + (255,))
-    draw_letter(img, letter, OBSIDIAN + (255,), FAVICON_LETTER)
+    draw_letter(img, letter, OBSIDIAN + (255,), FAVICON_LETTER, bold=bold)
     return img
 
 
-def app_icon(size: int, letter: str, maskable: bool = False) -> Image.Image:
+def app_icon(size: int, letter: str, maskable: bool = False, bold: bool = False) -> Image.Image:
     """Обсидиановый квадрат под обрез + титановая литера.
 
     Режим RGB, без альфа-канала. Иконка и так сплошная заливка без единого
@@ -106,18 +110,18 @@ def app_icon(size: int, letter: str, maskable: bool = False) -> Image.Image:
     а нарисованный радиус проступил бы вторым контуром внутри системного.
     """
     img = Image.new("RGB", (size, size), OBSIDIAN)
-    draw_letter(img, letter, TITAN, MASKABLE_LETTER if maskable else APP_LETTER)
+    draw_letter(img, letter, TITAN, MASKABLE_LETTER if maskable else APP_LETTER, bold=bold)
     return img
 
 
-def splash(width: int, height: int, letter: str) -> Image.Image:
+def splash(width: int, height: int, letter: str, bold: bool = False) -> Image.Image:
     """Стартовый экран iOS: сплошной обсидиан, титановая литера по центру.
 
     RGB без альфы и без единой надписи: текст потребовал бы подбора кегля под
     каждый из 30 размеров и разъезжался бы с фолбэк-шрифтом на раннере CI.
     """
     img = Image.new("RGB", (width, height), OBSIDIAN)
-    draw_letter(img, letter, TITAN, SPLASH_LETTER)
+    draw_letter(img, letter, TITAN, SPLASH_LETTER, bold=bold)
     return img
 
 
@@ -142,31 +146,40 @@ def splash_set() -> list[dict]:
     return out
 
 
-def render(outdir: Path, letter: str) -> list[str]:
-    """Пишет весь набор в outdir. Возвращает имена файлов."""
+def render(outdir: Path, letter: str, bold: bool = False) -> list[str]:
+    """Пишет весь набор в outdir. Возвращает имена файлов.
+
+    bold=True — компенсация оптического веса для широких/округлых литер
+    («Ю»): при идентичной фактической толщине штриха они читаются легче
+    блочных («Р»), см. gen_og.SANS_BOLD_CANDIDATES. Применяется ко всем
+    иконкам разом, не только фавикону — иначе комплект расходится сам с
+    собой (фавикон жирнее, чем иконка на домашнем экране).
+    """
     outdir.mkdir(parents=True, exist_ok=True)
 
     # .ico — единственный формат, который старые браузеры и часть краулеров
     # ищут по /favicon.ico молча, не заглядывая в <link>. Три размера в одном
     # файле: 16 для вкладки, 32 для ретины, 48 для панели закладок Windows.
-    favicon(48, letter).save(outdir / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+    favicon(48, letter, bold=bold).save(
+        outdir / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
     # Яндексу для карточки в поиске нужен фавикон файлом по прямой ссылке (SVG
     # или 120×120) — растровый PNG, а не живой SVG-текст: браузер рисует
     # фавикон вкладки системными шрифтами, веб-шрифт страницы (Inter) туда не
     # грузится, и текст в SVG уезжал бы в фолбэк другой насыщенности прямо на
     # вкладке. PNG печёт нужный вес шрифта один раз здесь.
-    favicon(120, letter).save(outdir / "favicon-120.png")
-    app_icon(180, letter).save(outdir / "apple-touch-icon.png")
+    favicon(120, letter, bold=bold).save(outdir / "favicon-120.png")
+    app_icon(180, letter, bold=bold).save(outdir / "apple-touch-icon.png")
     for size in (192, 512):
-        app_icon(size, letter).save(outdir / f"icon-{size}.png")
-    app_icon(512, letter, maskable=True).save(outdir / "icon-maskable-512.png")
+        app_icon(size, letter, bold=bold).save(outdir / f"icon-{size}.png")
+    app_icon(512, letter, maskable=True, bold=bold).save(outdir / "icon-maskable-512.png")
 
     names = ["favicon.ico", "favicon-120.png", "apple-touch-icon.png",
              "icon-192.png", "icon-512.png", "icon-maskable-512.png"]
     (outdir / "splash").mkdir(exist_ok=True)
     for item in splash_set():
         # optimize: сплошная заливка с одной литерой сжимается в единицы килобайт
-        splash(item["width"], item["height"], letter).save(outdir / item["name"], optimize=True)
+        splash(item["width"], item["height"], letter, bold=bold).save(
+            outdir / item["name"], optimize=True)
         names.append(item["name"])
     return names
 

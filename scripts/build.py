@@ -1324,7 +1324,10 @@ def main() -> int:
     write_markdown(clean, PUBLIC / "records.md")
     write_txt(clean, PUBLIC / "records.txt")
 
-    gen_icons.render(PUBLIC, ICON_LETTER)
+    # bold=True: «Ю» шире и «круглее» «Р» — при идентичной фактической
+    # толщине штриха читается визуально легче. Bold компенсирует оптику,
+    # не саму толщину (см. gen_icons.draw_letter).
+    gen_icons.render(PUBLIC, ICON_LETTER, bold=True)
     gen_screens.render(
         data, PUBLIC,
         title=SITE_TITLE,

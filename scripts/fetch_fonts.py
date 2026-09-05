@@ -46,6 +46,7 @@ OG_FONTS = [
     ("inter-regular.ttf", "Inter:400"),
     ("inter-medium.ttf", "Inter:500"),
     ("inter-semibold.ttf", "Inter:600"),
+    ("inter-bold.ttf", "Inter:700"),
     ("jetbrains-mono-medium.ttf", "JetBrains+Mono:500"),
     ("jetbrains-mono-bold.ttf", "JetBrains+Mono:700"),
 ]

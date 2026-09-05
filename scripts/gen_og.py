@@ -35,6 +35,15 @@ SANS_CANDIDATES = [
     Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
     Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
 ]
+# Только для иконок с широкими/округлыми литерами («Ю» и т.п.): при одинаковой
+# фактической толщине штриха такие литеры визуально читаются легче блочных
+# («Р»), потому что ink/bbox ниже — открытые дуги дают больше площади без
+# краски при том же контуре. SemiBold этого не компенсирует, а Bold — да.
+SANS_BOLD_CANDIDATES = [
+    OG_FONTS / "inter-bold.ttf",
+    Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+]
 MONO_CANDIDATES = [
     OG_FONTS / "jetbrains-mono-bold.ttf",
     Path("/System/Library/Fonts/Menlo.ttc"),
