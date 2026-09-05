@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """OG-картинка 1200×630 по рецепту брендбука BOROZDOV.
 
-Константа вне зеркала: OG всегда ОБСИДИАН, независимо от лика сайта.
-Рецепт: обсидиановая канва, hairline-рамка 2px, сверху разреженный UPPERCASE-лейбл
-slate, по центру крупный вордмарк, внизу hairline-линия и строка «моно-факт слева /
-домен справа». Без градиентов и теней.
+Константа вне зеркала: OG всегда ТИТАН, независимо от лика сайта — тем же
+ликом, что иконки бренда (см. BRAND.md, раздел «Иконки»). Рецепт: белая канва,
+hairline-рамка 2px, сверху разреженный UPPERCASE-лейбл slate, по центру крупный
+вордмарк, внизу hairline-линия и строка «моно-факт слева / домен справа».
+Без градиентов и теней.
 
 Шрифты берём из scripts/og-fonts/ (кладёт scripts/fetch_fonts.py): Pillow не умеет
 woff2, а на раннере CI брендовых шрифтов нет — без локальных ttf картинка рисуется
@@ -23,9 +24,13 @@ ROOT = Path(__file__).resolve().parent.parent
 OG_FONTS = ROOT / "scripts" / "og-fonts"
 
 OBSIDIAN = (13, 13, 13)
-TITAN = (250, 250, 250)
-HAIRLINE = (46, 46, 46)
-SLATE = (138, 138, 138)
+SURFACE = (255, 255, 255)
+
+# Роли ТИТАН. Иконки, сплэши и OG рисуются одним ликом: чёрная краска на белом.
+GROUND = SURFACE
+MARK = OBSIDIAN
+HAIRLINE = (228, 228, 228)
+SLATE = (107, 107, 107)
 
 W, H = 1200, 630
 INSET = 28
@@ -35,10 +40,7 @@ SANS_CANDIDATES = [
     Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
     Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
 ]
-# Только для иконок с широкими/округлыми литерами («Ю» и т.п.): при одинаковой
-# фактической толщине штриха такие литеры визуально читаются легче блочных
-# («Р»), потому что ink/bbox ниже — открытые дуги дают больше площади без
-# краски при том же контуре. SemiBold этого не компенсирует, а Bold — да.
+# Литера иконок — всегда Bold: единый вес во всех проектах бренда, см. BRAND.md.
 SANS_BOLD_CANDIDATES = [
     OG_FONTS / "inter-bold.ttf",
     Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
@@ -97,7 +99,7 @@ def fit_wordmark(d, words: list[str], max_w: int, max_lines: int) -> tuple[list[
 
 
 def render(out: Path, title: str, label: str, fact: str, domain: str) -> Path:
-    img = Image.new("RGB", (W, H), OBSIDIAN)
+    img = Image.new("RGB", (W, H), GROUND)
     d = ImageDraw.Draw(img)
 
     d.rectangle([INSET, INSET, W - INSET, H - INSET], outline=HAIRLINE, width=2)
@@ -114,7 +116,7 @@ def render(out: Path, title: str, label: str, fact: str, domain: str) -> Path:
     y = (H - block_h) / 2 - 14
     for line in lines:
         tw = d.textlength(line, font=font)
-        d.text(((W - tw) / 2, y), line, font=font, fill=TITAN)
+        d.text(((W - tw) / 2, y), line, font=font, fill=MARK)
         y += leading
 
     line_y = H - 148
@@ -130,7 +132,7 @@ def render(out: Path, title: str, label: str, fact: str, domain: str) -> Path:
         fact_w, _ = tracked_width(d, fact.upper(), mono, ftrack)
         if fact_w <= (right - left) * 0.55:
             break
-    tracked(d, (left, bottom_y), fact.upper(), mono, TITAN, ftrack)
+    tracked(d, (left, bottom_y), fact.upper(), mono, MARK, ftrack)
 
     room = right - left - fact_w - gap
     for dsize, dtrack in ((26, 5), (24, 4), (22, 3), (20, 2), (18, 1)):

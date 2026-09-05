@@ -11,6 +11,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from PIL import Image
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -19,18 +21,25 @@ import gen_icons  # noqa: E402
 import gen_screens  # noqa: E402
 
 OBSIDIAN = (13, 13, 13)
-TITAN = (250, 250, 250)
+SURFACE = (255, 255, 255)
 
 
-def ink_box(img, dark_bg):
-    """Границы краски в процентах канвы: (сверху, снизу, слева, справа)."""
+def ink_box(img):
+    """Границы краски в процентах канвы: (сверху, снизу, слева, справа).
+
+    Краска всегда тёмная: в иконках бренда инверсии нет, все они — чёрная
+    литера на белом. Прозрачное (срезанные скруглением углы фавикона) кладём
+    на белое, иначе convert("RGB") сделает из него чёрное и вся канва сойдёт
+    за краску — центровка тогда «сходится» на любой картинке.
+    """
     size = img.size[0]
-    px = img.convert("RGB").load()
+    flat = Image.alpha_composite(
+        Image.new("RGBA", img.size, (255, 255, 255, 255)), img.convert("RGBA"))
+    px = flat.convert("RGB").load()
     xs, ys = [], []
     for y in range(size):
         for x in range(size):
-            lum = px[x, y][0]
-            if (lum > 150) if dark_bg else (lum < 150):
+            if px[x, y][0] < 150:
                 xs.append(x)
                 ys.append(y)
     assert xs, "на иконке нет краски"
@@ -48,48 +57,63 @@ class LetterCentering(unittest.TestCase):
     целочисленной вставкой.
     """
 
-    def assert_centered(self, img, dark_bg):
-        top, bottom, left, right = ink_box(img, dark_bg)
+    def assert_centered(self, img):
+        top, bottom, left, right = ink_box(img)
         tol = 100 / img.size[0] + 0.1
         self.assertAlmostEqual(top, bottom, delta=tol, msg="литера не по центру по вертикали")
         self.assertAlmostEqual(left, right, delta=tol, msg="литера не по центру по горизонтали")
 
     def test_favicon_centered(self):
-        self.assert_centered(gen_icons.favicon(48, LETTER), dark_bg=False)
+        self.assert_centered(gen_icons.favicon(48, LETTER))
 
     def test_app_icon_centered(self):
-        self.assert_centered(gen_icons.app_icon(180, LETTER), dark_bg=True)
+        self.assert_centered(gen_icons.app_icon(180, LETTER))
 
     def test_maskable_centered(self):
-        self.assert_centered(gen_icons.app_icon(512, LETTER, maskable=True), dark_bg=True)
+        self.assert_centered(gen_icons.app_icon(512, LETTER, maskable=True))
 
     def test_maskable_fits_safe_zone(self):
         """Android кропит maskable до круга ⌀80% — литера обязана быть внутри."""
-        top, bottom, left, right = ink_box(
-            gen_icons.app_icon(512, LETTER, maskable=True), dark_bg=True)
+        top, bottom, left, right = ink_box(gen_icons.app_icon(512, LETTER, maskable=True))
         self.assertGreaterEqual(min(top, bottom, left, right), 10.0)
 
 
 class Materials(unittest.TestCase):
-    """Константы вне зеркала: фавикон титановый, иконки приложений обсидиановые."""
+    """Константа вне зеркала: любая иконка бренда — чёрная литера на белом.
 
-    def test_favicon_is_titan_with_obsidian_letter(self):
+    Инверсии в наборе нет. Раньше фавикон был титановым, а иконки приложений
+    обсидиановыми, и набор читался как два разных бренда: одно на вкладке,
+    другое на домашнем экране.
+    """
+
+    def test_favicon_is_white_with_obsidian_letter(self):
         img = gen_icons.favicon(64, LETTER).convert("RGB")
-        self.assertEqual(img.getpixel((32, 6)), TITAN)     # плашка
+        self.assertEqual(img.getpixel((32, 6)), SURFACE)   # плашка
         self.assertEqual(img.getpixel((0, 0)), (0, 0, 0))  # угол срезан скруглением
 
-    def test_app_icon_is_obsidian_without_alpha(self):
+    def test_app_icon_is_white_without_alpha(self):
         img = gen_icons.app_icon(180, LETTER)
         # Без альфа-канала намеренно: на iOS маска даёт белую кайму даже по
         # полностью непрозрачной альфе.
         self.assertEqual(img.mode, "RGB")
-        self.assertEqual(img.getpixel((0, 0)), OBSIDIAN)
+        self.assertEqual(img.getpixel((0, 0)), SURFACE)
 
     def test_app_icon_is_not_rounded(self):
         """Скругление кладут iOS и Android — свой радиус проступил бы вторым контуром."""
         img = gen_icons.app_icon(180, LETTER)
         for corner in ((0, 0), (179, 0), (0, 179), (179, 179)):
-            self.assertEqual(img.getpixel(corner), OBSIDIAN)
+            self.assertEqual(img.getpixel(corner), SURFACE)
+
+    def test_letter_is_one_height_across_roles(self):
+        """Фавикон и иконка приложения несут литеру одного роста.
+
+        Это то, что держит набор единым между сайтами: рост задан долей краски,
+        а не кеглем, поэтому «Р», «Ю» и «B» встают одинаково.
+        """
+        for img, expected in ((gen_icons.favicon(512, LETTER), gen_icons.FAVICON_LETTER),
+                              (gen_icons.app_icon(512, LETTER), gen_icons.APP_LETTER)):
+            top, bottom, _, _ = ink_box(img)
+            self.assertAlmostEqual(100 - top - bottom, expected * 100, delta=1.5)
 
     def test_missing_glyph_raises(self):
         with self.assertRaises(RuntimeError):
@@ -105,7 +129,6 @@ class RenderSet(unittest.TestCase):
                 self.assertTrue((out / name).exists(), name)
 
     def test_ico_carries_three_sizes(self):
-        from PIL import Image
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp)
             gen_icons.render(out, LETTER)
@@ -114,7 +137,7 @@ class RenderSet(unittest.TestCase):
 
 
 class Splash(unittest.TestCase):
-    """Стартовые экраны iOS: обсидиан, литера по центру, файлы = теги."""
+    """Стартовые экраны iOS: белое поле, литера по центру, файлы = теги."""
 
     def test_sizes_are_pt_times_scale(self):
         for item in gen_icons.splash_set():
@@ -132,16 +155,16 @@ class Splash(unittest.TestCase):
         self.assertIn("splash/1024x1366-2x.png", names)
         self.assertIn("splash/1024x1366-2x-landscape.png", names)
 
-    def test_obsidian_with_centered_titan_letter(self):
+    def test_white_with_centered_obsidian_letter(self):
         img = gen_icons.splash(1170, 2532, LETTER)
         self.assertEqual(img.mode, "RGB")
-        self.assertEqual(img.getpixel((0, 0)), OBSIDIAN)
-        self.assertEqual(img.getpixel((1169, 2531)), OBSIDIAN)
+        self.assertEqual(img.getpixel((0, 0)), SURFACE)
+        self.assertEqual(img.getpixel((1169, 2531)), SURFACE)
         px = img.load()
         xs, ys = [], []
         for y in range(0, 2532, 3):
             for x in range(0, 1170, 3):
-                if px[x, y][0] > 150:
+                if px[x, y][0] < 150:
                     xs.append(x)
                     ys.append(y)
         self.assertTrue(xs, "литеры нет")
@@ -158,7 +181,7 @@ class Splash(unittest.TestCase):
         # без этой меты iOS игнорирует стартовые экраны
         self.assertIn('<meta name="apple-mobile-web-app-capable" content="yes">', build.PAGE_TEMPLATE)
         self.assertIn("{startup_images}", build.PAGE_TEMPLATE)
-        # один обсидиановый набор: лик ручной, сплэш ему не следует
+        # один титановый набор: лик ручной, сплэш ему не следует
         self.assertNotIn("prefers-color-scheme", tags)
 
 
@@ -181,9 +204,14 @@ class Manifest(unittest.TestCase):
         purposes = {i["purpose"] for i in self.m["icons"]}
         self.assertEqual(purposes, {"any", "maskable"})
 
-    def test_colors_are_obsidian(self):
+    def test_colors_follow_the_icon_and_the_bars(self):
+        """theme_color красит системные панели, background_color — фон сплэша.
+
+        Второй идёт за иконкой: она белая, значит перед стартом не должно
+        мелькать тёмного кадра.
+        """
         self.assertEqual(self.m["theme_color"], "#0d0d0d")
-        self.assertEqual(self.m["background_color"], "#0d0d0d")
+        self.assertEqual(self.m["background_color"], "#ffffff")
 
     def test_start_url_and_shortcuts_inside_scope(self):
         # UTM-словарь brand_link: в Метрике запуски из PWA видны отдельно
@@ -207,7 +235,6 @@ class Manifest(unittest.TestCase):
     def test_screenshots_match_rendered_files(self):
         """Richer Install UI: файл существует, размер в манифесте = размер PNG,
         пропорция ≤ 2.3, у каждого form_factor — своя картинка."""
-        from PIL import Image
         data = {
             "fetched_at": "2026-08-27T17:33:28Z", "total_records": 1,
             "categories": [{"id": "women-lcm", "title": "Женщины, бассейн 50 м",
