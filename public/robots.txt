@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /records.
 
 Sitemap: https://russwimming-records-junior.borozdov.ru/sitemap.xml

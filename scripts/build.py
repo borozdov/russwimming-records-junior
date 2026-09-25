@@ -1035,8 +1035,12 @@ def webmanifest(categories: list[dict] | None = None) -> str:
     }, ensure_ascii=False, indent=2) + "\n"
 
 
+# Выгрузки records.* — файлы данных, а не страницы: title и description в них
+# не положить, и Вебмастер записывает их в «пустой title/description». Скачиванию
+# и API запрет не мешает — robots.txt читают только поисковые роботы.
 ROBOTS_TXT = f"""User-agent: *
 Allow: /
+Disallow: /records.
 
 Sitemap: https://{SITE_DOMAIN}/sitemap.xml
 """
@@ -1047,6 +1051,7 @@ REDIRECT_HTML = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Юношеские рекорды России по плаванию</title>
+<meta name="description" content="Переход к таблице юношеских рекордов России по плаванию.">
 <meta name="robots" content="noindex, follow">
 <meta http-equiv="refresh" content="0; url={QR_TARGET}">
 <link rel="canonical" href="{QR_TARGET}">
@@ -1064,6 +1069,7 @@ NOT_FOUND_HTML = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Страница не найдена — Юношеские рекорды России по плаванию</title>
+<meta name="description" content="Такой страницы нет. Таблица юношеских рекордов России по плаванию — на главной.">
 <meta name="robots" content="noindex">
 <meta http-equiv="refresh" content="0; url=https://{SITE_DOMAIN}/">
 <link rel="canonical" href="https://{SITE_DOMAIN}/">
@@ -1088,6 +1094,7 @@ OFFLINE_HTML = """<!doctype html>
 <meta name="theme-color" id="theme-color" content="#0d0d0d">
 <script>__THEME__</script>
 <title>Нет сети — Юношеские рекорды России по плаванию</title>
+<meta name="description" content="Нет соединения с сетью. Таблица рекордов откроется, когда связь вернётся.">
 <meta name="robots" content="noindex">
 <style>
 :root,[data-theme=obsidian]{color-scheme:dark;--canvas:#0d0d0d;--ink:#fafafa;--slate:#8a8a8a;--strong:#6b6b6b;--hairline:#2e2e2e}
