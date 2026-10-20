@@ -1,6 +1,6 @@
 {
   "source_url": "https://russwimming.ru/records/junior/",
-  "fetched_at": "2026-09-02T10:16:55Z",
+  "fetched_at": "2026-10-20T10:43:21Z",
   "total_records": 90,
   "categories": [
     {
@@ -1440,13 +1440,13 @@
           "distance_m": 800,
           "stroke_id": "freestyle",
           "is_25m_pool": true,
-          "athlete": "Бабинич Егор",
+          "athlete": "Вековищев Григорий",
           "roster": null,
-          "result": "7:39.26",
-          "result_seconds": 459.26,
-          "location": "Казань",
-          "date": "2025-11-11",
-          "date_original": "11.11.2025"
+          "result": "7:38.29",
+          "result_seconds": 458.29,
+          "location": "Астана",
+          "date": "2026-10-17",
+          "date_original": "17.10.2026"
         },
         {
           "discipline": "вольный стиль 1500 м (бассейн 25 м)",

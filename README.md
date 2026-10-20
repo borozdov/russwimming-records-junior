@@ -1,6 +1,6 @@
 # Юношеские рекорды России по плаванию
 
-[![Ежедневное обновление](https://github.com/borozdov/russwimming-records-junior/actions/workflows/update.yml/badge.svg)](https://github.com/borozdov/russwimming-records-junior/actions/workflows/update.yml) [![Рекордов](https://img.shields.io/badge/рекордов-90-0d0d0d)](https://russwimming-records-junior.borozdov.ru/records.json) [![Обновлено](https://img.shields.io/badge/обновлено-02.09.2026-0d0d0d)](https://russwimming-records-junior.borozdov.ru) [![License: MIT](https://img.shields.io/badge/license-MIT-0d0d0d)](LICENSE)
+[![Ежедневное обновление](https://github.com/borozdov/russwimming-records-junior/actions/workflows/update.yml/badge.svg)](https://github.com/borozdov/russwimming-records-junior/actions/workflows/update.yml) [![Рекордов](https://img.shields.io/badge/рекордов-90-0d0d0d)](https://russwimming-records-junior.borozdov.ru/records.json) [![Обновлено](https://img.shields.io/badge/обновлено-20.10.2026-0d0d0d)](https://russwimming-records-junior.borozdov.ru) [![License: MIT](https://img.shields.io/badge/license-MIT-0d0d0d)](LICENSE)
 
 Автообновляемое зеркало таблицы юношеских рекордов с [russwimming.ru](https://russwimming.ru/records/junior/).
 Раз в сутки GitHub Actions забирает страницу источника, пересобирает статический
@@ -17,7 +17,7 @@
 | Категорий | **5** |
 | Обновлено за 12 месяцев | **28** |
 | Даты рекордов | 2009–2026 |
-| Синхронизировано с источником | 02.09.2026 |
+| Синхронизировано с источником | 20.10.2026 |
 
 ## Категории
 
